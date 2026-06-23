@@ -1,5 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import app from './app';
-import connectDB from './configs/database'
+import connectDB from './core/configs/database'
 
 const port = process.env.PORT || 5000;
 const bootstrap = async () => {
