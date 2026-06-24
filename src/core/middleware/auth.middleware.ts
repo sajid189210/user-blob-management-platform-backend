@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { AuthService } from "../../modules/auth/services/implementation/auth.service";
 
 export interface IJwtPayload extends JwtPayload {
     userId: string;
