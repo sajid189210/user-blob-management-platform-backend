@@ -40,6 +40,11 @@ export class PostService implements IPostService {
         return (docs ?? []).map(postMapper);
     }
 
+    async searchPublishedPosts(query: string): Promise<IPostResponse[]> {
+        const docs = await this._postRepository.searchPublishedPosts(query);
+        return (docs ?? []).map(postMapper);
+    }
+
     async getPostsByAuthorId(authorId: string): Promise<IPostResponse[]> {
         const docs = await this._postRepository.getPostsByAuthorId(authorId);
         return (docs ?? []).map(postMapper);

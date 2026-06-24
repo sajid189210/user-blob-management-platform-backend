@@ -3,6 +3,7 @@ import { IPostResponse, PostStatusType } from "../../../../core/domain/interface
 export interface IPostService {
     createPost(data: { title: string; body: string; tags: string; status: PostStatusType; author: string }, file: Express.Multer.File): Promise<IPostResponse>;
     getAllPublishedPosts(): Promise<IPostResponse[]>;
+    searchPublishedPosts(query: string): Promise<IPostResponse[]>;
     getPostsByAuthorId(authorId: string): Promise<IPostResponse[]>;
     getPostById(id: string): Promise<IPostResponse | null>;
     updatePost(id: string, data: Partial<{ title: string; body: string; imageUrl: string; tags: string[]; status: string }>): Promise<IPostResponse | null>;

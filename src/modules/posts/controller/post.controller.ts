@@ -44,6 +44,20 @@ class PostController {
         }
     }
 
+    async searchPosts(req: Request, res: Response, next: NextFunction) {
+        try {
+            const query = (req.query.q as string) || '';
+            if (!query.trim()) {
+                res.status(StatusCode.BAD_REQUEST).json({ message: 'Search query is required' });
+                return;
+            }
+            const posts = await this._postService.searchPublishedPosts(query);
+            res.status(StatusCode.OK).json(successResponse('Search results fetched successfully', posts));
+        } catch (error: any) {
+            res.status(StatusCode.INTERNAL_SERVER).json({ message: error.message || 'Something went wrong' });
+        }
+    }
+
     async getPostsByAuthorId(req: Request, res: Response, next: NextFunction) {
         const authorId = req.params.authorId as string;
         try {

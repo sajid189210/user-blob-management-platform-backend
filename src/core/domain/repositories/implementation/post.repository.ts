@@ -17,6 +17,19 @@ export class PostRepository implements IPostRepository {
         return await this._postModel.find({ status: 'published' }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
     }
 
+    async searchPublishedPosts(query: string): Promise<IPostDocument[]> {
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\b${escaped}`, 'i');
+        return await this._postModel.find({
+            status: 'published',
+            $or: [
+                { title: regex },
+                { body: regex },
+                { tags: { $elemMatch: { $regex: regex } } },
+            ],
+        }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
+    }
+
     async getPostsByAuthorId(authorId: string): Promise<IPostDocument[]> {
         return await this._postModel.find({ author: authorId }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
     }

@@ -8,6 +8,7 @@ const buildPostRoutes = (postController: PostController) => {
     const postRouter = Router();
 
     postRouter.get(ROUTE_PATHS.POST.PUBLISHED, (req, res, next) => postController.getAllPublishedPosts(req, res, next));
+    postRouter.get(ROUTE_PATHS.POST.SEARCH, (req, res, next) => postController.searchPosts(req, res, next));
     postRouter.get(ROUTE_PATHS.POST.GET_BY_AUTHOR, (req, res, next) => postController.getPostsByAuthorId(req, res, next));
 
     postRouter.get(ROUTE_PATHS.LIKED.ROOT, authMiddleware, (req, res, next) => postController.getLikedPosts(req, res, next));
