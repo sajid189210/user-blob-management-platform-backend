@@ -9,6 +9,8 @@ export const ROUTE_PATHS = {
     POST: {
         ROOT: "/posts",
         CREATE: "/posts",
+        PUBLISHED: "/posts/published",
+        GET_BY_AUTHOR: "/posts/author/:authorId",
         GET_BY_ID: "/posts/:id",
         UPDATE: "/posts/:id",
         DELETE: "/posts/:id",

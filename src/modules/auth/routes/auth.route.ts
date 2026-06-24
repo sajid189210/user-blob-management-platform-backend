@@ -9,6 +9,7 @@ const buildAuthRouter = (authController: AuthController) => {
     authRouter.post(ROUTE_PATHS.AUTH.SIGNUP, (req, res, next) => authController.signup(req, res, next));
     authRouter.post(ROUTE_PATHS.AUTH.LOGIN, (req, res, next) => authController.login(req, res, next));
     authRouter.post(ROUTE_PATHS.AUTH.REFRESH_TOKEN, (req, res, next) => authController.validateRefreshToken(req, res, next));
+    authRouter.post(ROUTE_PATHS.AUTH.LOGOUT, (req, res, next) => authController.logout(req, res, next));
 
     return authRouter;
 }

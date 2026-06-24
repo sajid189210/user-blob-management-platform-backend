@@ -7,6 +7,7 @@ export interface IAuthService {
     verifyRefreshToken(token: string): IJwtPayload;
 
     findUserByEmail(email: string): Promise<IUser | null>;
+    getUserResponseByEmail(email: string): Promise<IUserResponse | null>;
     login(email: string, password: string): Promise<{
         user: IUserResponse;
         accessToken: string;

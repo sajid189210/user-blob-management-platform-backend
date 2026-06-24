@@ -46,6 +46,12 @@ export class AuthService implements IAuthService {
         return await this._userRepository.findUserByEmail(email);
     }
 
+    async getUserResponseByEmail(email: string): Promise<IUserResponse | null> {
+        const userDoc = await this._userRepository.findUserByEmail(email);
+        if (!userDoc) return null;
+        return userMapper(userDoc);
+    }
+
     async signup(name: string, email: string, password: string): Promise<IUserResponse | null> {
         const existing = await this._userRepository.findUserByEmail(email);
         if (existing) return null;

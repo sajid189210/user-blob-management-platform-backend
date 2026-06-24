@@ -3,6 +3,8 @@ import { IPostDocument } from "../../interface/post.interface";
 export interface IPostRepository {
     createPost(data: Partial<IPostDocument>): Promise<IPostDocument>;
     getAllPosts(): Promise<IPostDocument[]>;
+    getAllPublishedPosts(): Promise<IPostDocument[]>;
+    getPostsByAuthorId(authorId: string): Promise<IPostDocument[]>;
     getPostById(id: string): Promise<IPostDocument | null>;
     updatePost(id: string, data: Partial<IPostDocument>): Promise<IPostDocument | null>;
     deletePost(id: string): Promise<IPostDocument | null>;

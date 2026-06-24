@@ -19,22 +19,50 @@ class AuthController {
     }
 
     async validateRefreshToken(req: Request, res: Response, next: NextFunction) {
-        const token = req.cookies['refresh_token'];
-        if (!token) {
-            res.status(StatusCode.UNAUTHORIZED).json({ message: 'No refresh token provided' });
-            return;
+        try {
+            const token = req.cookies['refresh_token'];
+            if (!token) {
+                res.status(StatusCode.UNAUTHORIZED).json({ message: 'No refresh token provided' });
+                return;
+            }
+
+            const payload = this._authService.verifyRefreshToken(token);
+            const user = await this._authService.findUserByEmail(payload.email);
+            if (!user) {
+                res.status(StatusCode.UNAUTHORIZED).json({ message: 'User not found' });
+                return;
+            }
+
+            const accessToken = this._authService.generateAccessToken(payload.userId, user.email);
+            const refreshToken = this._authService.generateRefreshToken(payload.userId, user.email);
+
+            res.cookie('refresh_token', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+
+            const userData = await this._authService.getUserResponseByEmail(payload.email);
+
+            res.status(StatusCode.OK).json(successResponse('Token refreshed', {
+                user: userData,
+                accessToken,
+            }));
+        } catch (error) {
+            res.status(StatusCode.UNAUTHORIZED).json({ message: 'Invalid or expired refresh token' });
         }
+    }
 
-        const payload = this._authService.verifyRefreshToken(token);
-        const user = await this._authService.findUserByEmail(payload.email);
-        if (!user) {
-            res.status(StatusCode.UNAUTHORIZED).json({ message: 'User not found' });
-            return;
-        }
-
-        const accessToken = this._authService.generateAccessToken(payload.userId, user.email);
-
-        res.status(StatusCode.OK).json({ accessToken });
+    async logout(req: Request, res: Response, next: NextFunction) {
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/',
+        });
+        res.status(StatusCode.OK).json(successResponse('Logged out successfully'));
     }
 
     async login(req: Request, res: Response, next: NextFunction) {
@@ -55,6 +83,7 @@ class AuthController {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 

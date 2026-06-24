@@ -35,9 +35,19 @@ class PostController {
         }
     }
 
-    async getAllPosts(req: Request, res: Response, next: NextFunction) {
+    async getAllPublishedPosts(req: Request, res: Response, next: NextFunction) {
         try {
-            const posts = await this._postService.getAllPosts();
+            const posts = await this._postService.getAllPublishedPosts();
+            res.status(StatusCode.OK).json(successResponse('Published posts fetched successfully', posts));
+        } catch (error: any) {
+            res.status(StatusCode.INTERNAL_SERVER).json({ message: error.message || 'Something went wrong' });
+        }
+    }
+
+    async getPostsByAuthorId(req: Request, res: Response, next: NextFunction) {
+        const authorId = req.params.authorId as string;
+        try {
+            const posts = await this._postService.getPostsByAuthorId(authorId);
             res.status(StatusCode.OK).json(successResponse('Posts fetched successfully', posts));
         } catch (error: any) {
             res.status(StatusCode.INTERNAL_SERVER).json({ message: error.message || 'Something went wrong' });
