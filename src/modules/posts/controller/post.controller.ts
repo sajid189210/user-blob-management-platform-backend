@@ -102,6 +102,37 @@ class PostController {
             res.status(StatusCode.INTERNAL_SERVER).json({ message: error.message || 'Something went wrong' });
         }
     }
+
+    async toggleLike(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = (req as any).user?.userId;
+            const postId = req.params.id as string;
+            const result = await this._postService.toggleLike(userId, postId);
+            res.status(StatusCode.OK).json(successResponse('Like toggled successfully', result));
+        } catch (error: any) {
+            res.status(StatusCode.INTERNAL_SERVER).json({ message: error.message || 'Something went wrong' });
+        }
+    }
+
+    async getLikedPosts(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = (req as any).user?.userId;
+            const posts = await this._postService.getLikedPosts(userId);
+            res.status(StatusCode.OK).json(successResponse('Liked posts fetched successfully', posts));
+        } catch (error: any) {
+            res.status(StatusCode.INTERNAL_SERVER).json({ message: error.message || 'Something went wrong' });
+        }
+    }
+
+    async getLikedIds(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = (req as any).user?.userId;
+            const ids = await this._postService.getLikedIds(userId);
+            res.status(StatusCode.OK).json(successResponse('Liked IDs fetched successfully', ids));
+        } catch (error: any) {
+            res.status(StatusCode.INTERNAL_SERVER).json({ message: error.message || 'Something went wrong' });
+        }
+    }
 }
 
 export default PostController;

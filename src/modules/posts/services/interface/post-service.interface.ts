@@ -7,4 +7,7 @@ export interface IPostService {
     getPostById(id: string): Promise<IPostResponse | null>;
     updatePost(id: string, data: Partial<{ title: string; body: string; imageUrl: string; tags: string[]; status: string }>): Promise<IPostResponse | null>;
     deletePost(id: string): Promise<IPostResponse | null>;
+    toggleLike(userId: string, postId: string): Promise<{ liked: boolean; likedIds: string[]; likes: number }>;
+    getLikedPosts(userId: string): Promise<IPostResponse[]>;
+    getLikedIds(userId: string): Promise<string[]>;
 }

@@ -15,4 +15,9 @@ export const ROUTE_PATHS = {
         UPDATE: "/posts/:id",
         DELETE: "/posts/:id",
     },
+    LIKED: {
+        ROOT: "/posts/liked",
+        TOGGLE: "/posts/:id/like",
+        IDS: "/posts/liked/ids",
+    },
 }

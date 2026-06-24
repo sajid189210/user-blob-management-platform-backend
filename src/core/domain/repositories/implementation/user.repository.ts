@@ -12,4 +12,24 @@ export class UserRepository implements IUserRepository {
     async createUser(name: string, email: string, password: string): Promise<IUserDocument> {
         return await this._userModel.create({ name, email, password });
     }
+
+    async findUserById(userId: string): Promise<IUserDocument | null> {
+        return await this._userModel.findById(userId);
+    }
+
+    async addLiked(userId: string, postId: string): Promise<IUserDocument | null> {
+        return await this._userModel.findByIdAndUpdate(
+            userId,
+            { $addToSet: { liked: postId } },
+            { new: true }
+        );
+    }
+
+    async removeLiked(userId: string, postId: string): Promise<IUserDocument | null> {
+        return await this._userModel.findByIdAndUpdate(
+            userId,
+            { $pull: { liked: postId } },
+            { new: true }
+        );
+    }
 }

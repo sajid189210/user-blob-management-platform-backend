@@ -32,4 +32,16 @@ export class PostRepository implements IPostRepository {
     async deletePost(id: string): Promise<IPostDocument | null> {
         return await this._postModel.findByIdAndDelete(id);
     }
+
+    async getPostsByIds(ids: string[]): Promise<IPostDocument[]> {
+        return await this._postModel.find({ _id: { $in: ids } }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
+    }
+
+    async incrementLikes(postId: string): Promise<IPostDocument | null> {
+        return await this._postModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { new: true }).populate('author', 'name email').lean();
+    }
+
+    async decrementLikes(postId: string): Promise<IPostDocument | null> {
+        return await this._postModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { new: true }).populate('author', 'name email').lean();
+    }
 }

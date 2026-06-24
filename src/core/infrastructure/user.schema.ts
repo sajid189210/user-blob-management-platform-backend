@@ -26,6 +26,12 @@ const UserSchema = new Schema<IUserDocument>(
             minlength: [4, 'Password must be at least 4 characters long'],
             select: false,
         },
+        liked: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Post',
+            },
+        ],
     },
     {
         timestamps: true,

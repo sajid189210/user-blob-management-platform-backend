@@ -8,4 +8,7 @@ export interface IPostRepository {
     getPostById(id: string): Promise<IPostDocument | null>;
     updatePost(id: string, data: Partial<IPostDocument>): Promise<IPostDocument | null>;
     deletePost(id: string): Promise<IPostDocument | null>;
+    getPostsByIds(ids: string[]): Promise<IPostDocument[]>;
+    incrementLikes(postId: string): Promise<IPostDocument | null>;
+    decrementLikes(postId: string): Promise<IPostDocument | null>;
 }
