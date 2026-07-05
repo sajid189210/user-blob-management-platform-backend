@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { errorResponse } from "../domain/mappers/response.mapper";
 
 export interface IJwtPayload extends JwtPayload {
     userId: string;
@@ -11,19 +12,20 @@ export interface IAuthRequest extends Request {
     user?: IJwtPayload;
 }
 
-export const authMiddleware = (req: IAuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = (req: IAuthRequest, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        res.status(401).json({ message: "No token provided" });
+    if (!authHeader?.startsWith("Bearer ")) {
+        errorResponse(res, 401, null, "No token provided");
         return;
     }
 
     const token = authHeader.split(" ")[1];
     try {
-        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET || 'jwt_access_token_secret') as IJwtPayload;
+        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET ?? 'jwt_access_token_secret') as IJwtPayload;
         req.user = decoded;
         next();
     } catch (error) {
-        res.status(401).json({ message: "Invalid or expired token" });
+        console.error('Auth middleware error:', error);
+        errorResponse(res, 401, null, "Invalid or expired token");
     }
 }

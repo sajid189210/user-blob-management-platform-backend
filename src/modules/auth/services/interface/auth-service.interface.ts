@@ -1,5 +1,5 @@
 import { IJwtPayload } from "../../../../core/middleware/auth.middleware";
-import { IUser, IUserResponse } from "../../../../core/domain/interface/user.interface";
+import { ILoginResponse, IUser, IUserResponse } from "../../../../core/domain/interface/user.interface";
 
 export interface IAuthService {
     generateAccessToken(userId: string, email: string): string;
@@ -8,10 +8,6 @@ export interface IAuthService {
 
     findUserByEmail(email: string): Promise<IUser | null>;
     getUserResponseByEmail(email: string): Promise<IUserResponse | null>;
-    login(email: string, password: string): Promise<{
-        user: IUserResponse;
-        accessToken: string;
-        refreshToken: string;
-    } | null>;
+    login(email: string, password: string): Promise<ILoginResponse | null>;
     signup(name: string, email: string, password: string): Promise<IUserResponse | null>;
 }

@@ -3,12 +3,12 @@ import dns from 'dns';
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const mongoUrl = process.env.MONGO_URL;
-const connectDB = async () => {
+const connectDB = async (): Promise<void> => {
     try {
         await mongoose.connect(mongoUrl!);
-        console.log('MongoDB connected');
+        console.warn('MongoDB connected');
     } catch (error) {
-        console.error('MongoDB connection error:', error);
+        console.warn('MongoDB connection error:', error);
     }
 };
 

@@ -18,3 +18,9 @@ export interface IUserResponse {
     name: string;
     email: string;
 }
+
+export interface ILoginResponse {
+    user: IUserResponse;
+    accessToken: string;
+    refreshToken: string;
+}

@@ -32,3 +32,31 @@ export interface IPostResponse {
 }
 
 export type PostStatusType = 'draft' | 'published';
+
+export type PopulatedAuthor = {
+    _id: Types.ObjectId;
+    email?: string;
+    name?: string;
+};
+
+export interface ICreatePostData {
+    title: string;
+    body: string;
+    tags: string;
+    status: PostStatusType;
+    author: string;
+}
+
+export interface IUpdatePostData {
+    title?: string;
+    body?: string;
+    imageUrl?: string;
+    tags?: string[];
+    status?: string;
+}
+
+export interface IToggleLikeResponse {
+    liked: boolean;
+    likedIds: string[];
+    likes: number;
+}

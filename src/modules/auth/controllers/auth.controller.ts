@@ -1,35 +1,35 @@
 import { NextFunction, Request, Response } from "express";
 import { IAuthService } from "../services/interface/auth-service.interface";
 import StatusCode from "../../../core/enums/status-codes";
-import successResponse from "../../../core/domain/mappers/response.mapper";
+import { successResponse, errorResponse } from "../../../core/domain/mappers/response.mapper";
 
 class AuthController {
     constructor(private _authService: IAuthService) { }
 
-    async signup(req: Request, res: Response, next: NextFunction) {
+    async signup(req: Request, res: Response, _next: NextFunction): Promise<void> {
         const { name, email, password } = req.body;
 
         const result = await this._authService.signup(name, email, password);
         if (!result) {
-            res.status(StatusCode.CONFLICT).json({ message: 'Email already in use' });
+            errorResponse(res, StatusCode.CONFLICT, null, 'Email already in use');
             return;
         }
 
         res.status(StatusCode.CREATED).json(successResponse('Account created successfully.'));
     }
 
-    async validateRefreshToken(req: Request, res: Response, next: NextFunction) {
+    async validateRefreshToken(req: Request, res: Response, _next: NextFunction): Promise<void> {
         try {
             const token = req.cookies['refresh_token'];
             if (!token) {
-                res.status(StatusCode.UNAUTHORIZED).json({ message: 'No refresh token provided' });
+                errorResponse(res, StatusCode.UNAUTHORIZED, null, 'No refresh token provided');
                 return;
             }
 
             const payload = this._authService.verifyRefreshToken(token);
             const user = await this._authService.findUserByEmail(payload.email);
             if (!user) {
-                res.status(StatusCode.UNAUTHORIZED).json({ message: 'User not found' });
+                errorResponse(res, StatusCode.UNAUTHORIZED, null, 'User not found');
                 return;
             }
 
@@ -50,12 +50,12 @@ class AuthController {
                 user: userData,
                 accessToken,
             }));
-        } catch (error) {
-            res.status(StatusCode.UNAUTHORIZED).json({ message: 'Invalid or expired refresh token' });
+        } catch {
+            errorResponse(res, StatusCode.UNAUTHORIZED, null, 'Invalid or expired refresh token');
         }
     }
 
-    async logout(req: Request, res: Response, next: NextFunction) {
+    async logout(req: Request, res: Response, _next: NextFunction): Promise<void> {
         res.clearCookie('refresh_token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -65,17 +65,17 @@ class AuthController {
         res.status(StatusCode.OK).json(successResponse('Logged out successfully'));
     }
 
-    async login(req: Request, res: Response, next: NextFunction) {
+    async login(req: Request, res: Response, _next: NextFunction): Promise<void> {
         const { email, password } = req.body;
 
         const result = await this._authService.login(email, password);
         if (!result) {
-            res.status(StatusCode.UNAUTHORIZED).json({ message: 'Invalid email or password' });
+            errorResponse(res, StatusCode.UNAUTHORIZED, null, 'Invalid email or password');
             return;
         }
 
         if (!result.accessToken || !result.refreshToken) {
-            res.status(StatusCode.INTERNAL_SERVER).json({ message: 'Something went wrong.' });
+            errorResponse(res, StatusCode.INTERNAL_SERVER, null, 'Something went wrong.');
             return;
         }
 

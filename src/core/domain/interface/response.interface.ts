@@ -1,4 +1,4 @@
-interface IResponse<T = null> {
+interface IResponse<T> {
     data: T;
     message: string;
 }

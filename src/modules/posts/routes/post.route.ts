@@ -3,8 +3,10 @@ import { ROUTE_PATHS } from '../../../core/domain/constants/routes';
 import PostController from '../controller/post.controller';
 import upload from '../../../core/middleware/upload.middleware';
 import { authMiddleware } from '../../../core/middleware/auth.middleware';
+import { validate } from '../../../core/middleware/validate.middleware';
+import { CreatePostDto, UpdatePostDto } from '../../../core/domain/dto/post.dto';
 
-const buildPostRoutes = (postController: PostController) => {
+const buildPostRoutes = (postController: PostController): Router => {
     const postRouter = Router();
 
     postRouter.get(ROUTE_PATHS.POST.PUBLISHED, (req: Request, res: Response, next: NextFunction) => postController.getAllPublishedPosts(req, res, next));
@@ -16,11 +18,11 @@ const buildPostRoutes = (postController: PostController) => {
     postRouter.post(ROUTE_PATHS.LIKED.TOGGLE, authMiddleware, (req: Request, res: Response, next: NextFunction) => postController.toggleLike(req, res, next));
 
     postRouter.get(ROUTE_PATHS.POST.GET_BY_ID, (req: Request, res: Response, next: NextFunction) => postController.getPostById(req, res, next));
-    postRouter.post(ROUTE_PATHS.POST.CREATE, authMiddleware, upload.single('image'), (req: Request, res: Response, next: NextFunction) => postController.createPost(req, res, next));
-    postRouter.put(ROUTE_PATHS.POST.UPDATE, authMiddleware, upload.single('image'), (req: Request, res: Response, next: NextFunction) => postController.updatePost(req, res, next));
+    postRouter.post(ROUTE_PATHS.POST.CREATE, authMiddleware, upload.single('image'), validate(CreatePostDto), (req: Request, res: Response, next: NextFunction) => postController.createPost(req, res, next));
+    postRouter.put(ROUTE_PATHS.POST.UPDATE, authMiddleware, upload.single('image'), validate(UpdatePostDto), (req: Request, res: Response, next: NextFunction) => postController.updatePost(req, res, next));
     postRouter.delete(ROUTE_PATHS.POST.DELETE, authMiddleware, (req: Request, res: Response, next: NextFunction) => postController.deletePost(req, res, next));
 
     return postRouter;
-}
+};
 
 export default buildPostRoutes;

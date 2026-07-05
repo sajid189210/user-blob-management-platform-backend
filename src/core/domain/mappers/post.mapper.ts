@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
-import { IPost, IPostDocument, IPostResponse } from "../interface/post.interface";
+import { IPost, IPostDocument, IPostResponse, PopulatedAuthor } from "../interface/post.interface";
 
 export const postMapper = (postDocument: IPostDocument): IPostResponse => {
-    const author = postDocument.author as any;
+    const author = postDocument.author;
     const isPopulated = typeof author === 'object' && author._id;
 
     return {
@@ -13,8 +13,8 @@ export const postMapper = (postDocument: IPostDocument): IPostResponse => {
         tags: postDocument.tags,
         status: postDocument.status,
         author: String(author),
-        authorEmail: isPopulated ? author.email : undefined,
-        authorName: isPopulated ? author.name : undefined,
+        authorEmail: isPopulated ? (author as PopulatedAuthor).email : undefined,
+        authorName: isPopulated ? (author as PopulatedAuthor).name : undefined,
         likes: postDocument.likes,
         createdAt: postDocument.createdAt,
         updatedAt: postDocument.updatedAt,

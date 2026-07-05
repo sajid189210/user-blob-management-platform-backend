@@ -19,13 +19,13 @@ export class PostRepository implements IPostRepository {
 
     async searchPublishedPosts(query: string): Promise<IPostDocument[]> {
         const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`\\b${escaped}`, 'i');
+        const pattern = '\\b' + escaped;
         return await this._postModel.find({
             status: 'published',
             $or: [
-                { title: regex },
-                { body: regex },
-                { tags: { $elemMatch: { $regex: regex } } },
+                { title: { $regex: pattern, $options: 'i' } },
+                { body: { $regex: pattern, $options: 'i' } },
+                { tags: { $elemMatch: { $regex: pattern, $options: 'i' } } },
             ],
         }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
     }

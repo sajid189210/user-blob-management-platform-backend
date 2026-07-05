@@ -1,5 +1,5 @@
 import { IPostRepository } from "../../../../core/domain/repositories/interface/post-repository.interface";
-import { IPostResponse, PostStatusType } from "../../../../core/domain/interface/post.interface";
+import { ICreatePostData, IPostDocument, IPostResponse, IToggleLikeResponse, IUpdatePostData } from "../../../../core/domain/interface/post.interface";
 import { postMapper, postDocumentMapper } from "../../../../core/domain/mappers/post.mapper";
 import { IPostService } from "../interface/post-service.interface";
 import { IUserRepository } from "../../../../core/domain/repositories/interface/user-repository.interface";
@@ -11,13 +11,14 @@ export class PostService implements IPostService {
         private readonly _userRepository: IUserRepository,
     ) { }
 
-    async createPost(data: { title: string; body: string; tags: string; status: PostStatusType; author: string }, file: Express.Multer.File): Promise<IPostResponse> {
-        let imageUrl = '';
+    async createPost(data: ICreatePostData, file: Express.Multer.File): Promise<IPostResponse> {
+        let imageUrl: string;
 
         try {
             imageUrl = await uploadToCloudinary(file.buffer);
-        } catch (err: any) {
-            throw new Error('Image upload failed: ' + (err.message || 'Unknown error'));
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            throw new Error('Image upload failed: ' + message, { cause: err });
         }
 
         const tags = data.tags ? data.tags.split(',').map(t => t.trim()) : [];
@@ -55,9 +56,9 @@ export class PostService implements IPostService {
         return doc ? postMapper(doc) : null;
     }
 
-    async updatePost(id: string, data: Partial<{ title: string; body: string; imageUrl: string; tags: string[]; status: string }>): Promise<IPostResponse | null> {
-        const updateData: any = { ...data };
-        if (updateData.status) {
+    async updatePost(id: string, data: Partial<IUpdatePostData>): Promise<IPostResponse | null> {
+        const updateData: Record<string, unknown> = { ...data };
+        if (typeof updateData.status === 'string') {
             updateData.status = updateData.status as 'draft' | 'published';
         }
         const doc = await this._postRepository.updatePost(id, updateData);
@@ -69,14 +70,14 @@ export class PostService implements IPostService {
         return doc ? postMapper(doc) : null;
     }
 
-    async toggleLike(userId: string, postId: string): Promise<{ liked: boolean; likedIds: string[]; likes: number }> {
+    async toggleLike(userId: string, postId: string): Promise<IToggleLikeResponse> {
         const user = await this._userRepository.findUserById(userId);
-        if (!user) throw new Error('User not found');
+        if (!user) { throw new Error('User not found'); }
 
         const likedIds = (user.liked || []).map(f => f.toString());
         const isLiked = likedIds.includes(postId);
 
-        let updatedPost: any;
+        let updatedPost: IPostDocument | null;
         if (isLiked) {
             await this._userRepository.removeLiked(userId, postId);
             updatedPost = await this._postRepository.decrementLikes(postId);
@@ -86,17 +87,17 @@ export class PostService implements IPostService {
         }
 
         const updatedUser = await this._userRepository.findUserById(userId);
-        const updatedLiked = (updatedUser?.liked || []).map(f => f.toString());
+        const updatedLiked = (updatedUser?.liked ?? []).map(f => f.toString());
 
         return { liked: !isLiked, likedIds: updatedLiked, likes: updatedPost?.likes ?? 0 };
     }
 
     async getLikedPosts(userId: string): Promise<IPostResponse[]> {
         const user = await this._userRepository.findUserById(userId);
-        if (!user) return [];
+        if (!user) { return []; }
 
         const likedIds = (user.liked || []).map(f => f.toString());
-        if (likedIds.length === 0) return [];
+        if (likedIds.length === 0) { return []; }
 
         const docs = await this._postRepository.getPostsByIds(likedIds);
         return (docs ?? []).map(postMapper);
@@ -104,6 +105,6 @@ export class PostService implements IPostService {
 
     async getLikedIds(userId: string): Promise<string[]> {
         const user = await this._userRepository.findUserById(userId);
-        return (user?.liked || []).map(f => f.toString());
+        return (user?.liked ?? []).map(f => f.toString());
     }
 }

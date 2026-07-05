@@ -10,7 +10,7 @@ import { buildPostContainer } from './core/containers/post.container';
 const app = express();
 app.use(helmet());
 
-const ALLOWED_URLS: string[] = (process.env.ALLOWED_URLS || '')
+const ALLOWED_URLS: string[] = (process.env.ALLOWED_URLS ?? '')
     .split(',')
     .map(url => url.trim());
 
