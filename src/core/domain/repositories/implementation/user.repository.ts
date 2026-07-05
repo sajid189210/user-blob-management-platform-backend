@@ -1,9 +1,12 @@
 import { Model } from "mongoose";
 import { IUserDocument } from "../../interface/user.interface";
 import { IUserRepository } from "../interface/user-repository.interface";
+import { BaseRepository } from "./base.repository";
 
-export class UserRepository implements IUserRepository {
-    constructor(private readonly _userModel: Model<IUserDocument>) { }
+export class UserRepository extends BaseRepository<IUserDocument> implements IUserRepository {
+    constructor(private readonly _userModel: Model<IUserDocument>) {
+        super(_userModel);
+    }
 
     async findUserByEmail(email: string): Promise<IUserDocument | null> {
         return await this._userModel.findOne({ email }).select('+password');
@@ -11,10 +14,6 @@ export class UserRepository implements IUserRepository {
 
     async createUser(name: string, email: string, password: string): Promise<IUserDocument> {
         return await this._userModel.create({ name, email, password });
-    }
-
-    async findUserById(userId: string): Promise<IUserDocument | null> {
-        return await this._userModel.findById(userId);
     }
 
     async addLiked(userId: string, postId: string): Promise<IUserDocument | null> {

@@ -1,3 +1,3 @@
-export enum ERROR_MESSAGES {
-SESSION_
+export enum ErrorMessages {
+SESSION_EXPIRED = 'session_expired',
 }

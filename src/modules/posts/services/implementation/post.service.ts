@@ -23,7 +23,7 @@ export class PostService implements IPostService {
 
         const tags = data.tags ? data.tags.split(',').map(t => t.trim()) : [];
 
-        const postDoc = await this._postRepository.createPost(
+        const postDoc = await this._postRepository.create(
             postDocumentMapper({
                 title: data.title,
                 body: data.body,
@@ -52,7 +52,7 @@ export class PostService implements IPostService {
     }
 
     async getPostById(id: string): Promise<IPostResponse | null> {
-        const doc = await this._postRepository.getPostById(id);
+        const doc = await this._postRepository.findById(id);
         return doc ? postMapper(doc) : null;
     }
 
@@ -61,17 +61,17 @@ export class PostService implements IPostService {
         if (typeof updateData.status === 'string') {
             updateData.status = updateData.status as 'draft' | 'published';
         }
-        const doc = await this._postRepository.updatePost(id, updateData);
+        const doc = await this._postRepository.update(id, updateData);
         return doc ? postMapper(doc) : null;
     }
 
     async deletePost(id: string): Promise<IPostResponse | null> {
-        const doc = await this._postRepository.deletePost(id);
+        const doc = await this._postRepository.delete(id);
         return doc ? postMapper(doc) : null;
     }
 
     async toggleLike(userId: string, postId: string): Promise<IToggleLikeResponse> {
-        const user = await this._userRepository.findUserById(userId);
+        const user = await this._userRepository.findById(userId);
         if (!user) { throw new Error('User not found'); }
 
         const likedIds = (user.liked || []).map(f => f.toString());
@@ -86,25 +86,25 @@ export class PostService implements IPostService {
             updatedPost = await this._postRepository.incrementLikes(postId);
         }
 
-        const updatedUser = await this._userRepository.findUserById(userId);
+        const updatedUser = await this._userRepository.findById(userId);
         const updatedLiked = (updatedUser?.liked ?? []).map(f => f.toString());
 
         return { liked: !isLiked, likedIds: updatedLiked, likes: updatedPost?.likes ?? 0 };
     }
 
     async getLikedPosts(userId: string): Promise<IPostResponse[]> {
-        const user = await this._userRepository.findUserById(userId);
+        const user = await this._userRepository.findById(userId);
         if (!user) { return []; }
 
         const likedIds = (user.liked || []).map(f => f.toString());
         if (likedIds.length === 0) { return []; }
 
-        const docs = await this._postRepository.getPostsByIds(likedIds);
+        const docs = await this._postRepository.findByIds(likedIds);
         return (docs ?? []).map(postMapper);
     }
 
     async getLikedIds(userId: string): Promise<string[]> {
-        const user = await this._userRepository.findUserById(userId);
+        const user = await this._userRepository.findById(userId);
         return (user?.liked ?? []).map(f => f.toString());
     }
 }

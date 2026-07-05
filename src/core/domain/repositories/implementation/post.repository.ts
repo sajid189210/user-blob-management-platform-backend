@@ -1,15 +1,14 @@
 import { Model } from "mongoose";
 import { IPostDocument } from "../../interface/post.interface";
 import { IPostRepository } from "../interface/post-repository.interface";
+import { BaseRepository } from "./base.repository";
 
-export class PostRepository implements IPostRepository {
-    constructor(private readonly _postModel: Model<IPostDocument>) { }
-
-    async createPost(data: Partial<IPostDocument>): Promise<IPostDocument> {
-        return await this._postModel.create(data);
+export class PostRepository extends BaseRepository<IPostDocument> implements IPostRepository {
+    constructor(private readonly _postModel: Model<IPostDocument>) {
+        super(_postModel);
     }
 
-    async getAllPosts(): Promise<IPostDocument[]> {
+    async findAll(): Promise<IPostDocument[]> {
         return await this._postModel.find().sort({ createdAt: -1 }).populate('author', 'name email').lean();
     }
 
@@ -34,19 +33,19 @@ export class PostRepository implements IPostRepository {
         return await this._postModel.find({ author: authorId }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
     }
 
-    async getPostById(id: string): Promise<IPostDocument | null> {
+    async findById(id: string): Promise<IPostDocument | null> {
         return await this._postModel.findById(id).populate('author', 'name email').lean();
     }
 
-    async updatePost(id: string, data: Partial<IPostDocument>): Promise<IPostDocument | null> {
+    async update(id: string, data: Partial<IPostDocument>): Promise<IPostDocument | null> {
         return await this._postModel.findByIdAndUpdate(id, data, { new: true }).populate('author', 'name email').lean();
     }
 
-    async deletePost(id: string): Promise<IPostDocument | null> {
+    async delete(id: string): Promise<IPostDocument | null> {
         return await this._postModel.findByIdAndDelete(id);
     }
 
-    async getPostsByIds(ids: string[]): Promise<IPostDocument[]> {
+    async findByIds(ids: string[]): Promise<IPostDocument[]> {
         return await this._postModel.find({ _id: { $in: ids } }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
     }
 
