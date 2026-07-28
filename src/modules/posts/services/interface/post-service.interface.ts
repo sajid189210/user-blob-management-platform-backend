@@ -6,7 +6,7 @@ export interface IPostService {
     searchPublishedPosts(query: string): Promise<IPostResponse[]>;
     getPostsByAuthorId(authorId: string): Promise<IPostResponse[]>;
     getPostById(id: string): Promise<IPostResponse | null>;
-    updatePost(id: string, data: Partial<IUpdatePostData>): Promise<IPostResponse | null>;
+    updatePost(id: string, data: Partial<IUpdatePostData>, file?: Express.Multer.File): Promise<IPostResponse | null>;
     deletePost(id: string): Promise<IPostResponse | null>;
     toggleLike(userId: string, postId: string): Promise<IToggleLikeResponse>;
     getLikedPosts(userId: string): Promise<IPostResponse[]>;

@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { ROUTE_PATHS } from '../../../core/domain/constants/routes';
-import PostController from '../controller/post.controller';
+import PostController from '../controllers/post.controller';
 import upload from '../../../core/middleware/upload.middleware';
 import { authMiddleware } from '../../../core/middleware/auth.middleware';
 import { validate } from '../../../core/middleware/validate.middleware';

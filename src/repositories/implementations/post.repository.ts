@@ -1,6 +1,6 @@
 import { Model } from "mongoose";
-import { IPostDocument } from "../../interface/post.interface";
-import { IPostRepository } from "../interface/post-repository.interface";
+import { IPostDocument } from "../../core/domain/interface/post.interface";
+import { IPostRepository } from "../interfaces/post-repository.interface";
 import { BaseRepository } from "./base.repository";
 
 export class PostRepository extends BaseRepository<IPostDocument> implements IPostRepository {

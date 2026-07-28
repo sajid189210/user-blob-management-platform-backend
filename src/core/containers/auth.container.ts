@@ -2,7 +2,7 @@ import { Router } from "express";
 import AuthController from "../../modules/auth/controllers/auth.controller"
 import buildAuthRouter from "../../modules/auth/routes/auth.route";
 import { AuthService } from "../../modules/auth/services/implementation/auth.service";
-import { UserRepository } from "../domain/repositories/implementation/user.repository"
+import { UserRepository } from "../../repositories/implementations/user.repository"
 import UserSchema from '../infrastructure/user.schema';
 
 export const buildAuthContainer = (): Router => {

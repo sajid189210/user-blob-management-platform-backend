@@ -1,6 +1,6 @@
 import { Model } from "mongoose";
-import { IUserDocument } from "../../interface/user.interface";
-import { IUserRepository } from "../interface/user-repository.interface";
+import { IUserDocument } from "../../core/domain/interface/user.interface";
+import { IUserRepository } from "../interfaces/user-repository.interface";
 import { BaseRepository } from "./base.repository";
 
 export class UserRepository extends BaseRepository<IUserDocument> implements IUserRepository {

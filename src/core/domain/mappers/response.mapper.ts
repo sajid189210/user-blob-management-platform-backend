@@ -9,7 +9,7 @@ export const successResponse = (message: string, data: unknown = null): IRespons
     }
 }
 
-export const errorResponse = (res: Response, statusCode: number = StatusCode.INTERNAL_SERVER, error: unknown, defaultMessage?: string): void => {
+export const errorResponse = (res: Response, statusCode: number = StatusCode.INTERNAL_SERVER_ERROR, error: unknown, defaultMessage?: string): void => {
     const message = error instanceof Error ? error.message : (defaultMessage ?? 'Something went wrong');
     res.status(statusCode).json({ message });
 };

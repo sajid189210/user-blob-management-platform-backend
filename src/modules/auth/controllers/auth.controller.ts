@@ -75,7 +75,7 @@ class AuthController {
         }
 
         if (!result.accessToken || !result.refreshToken) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, null, 'Something went wrong.');
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, null, 'Something went wrong.');
             return;
         }
 

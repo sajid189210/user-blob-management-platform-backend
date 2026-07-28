@@ -1,8 +1,8 @@
 import { NextFunction, Response } from "express";
 import { IPostService } from "../services/interface/post-service.interface";
+import { IUpdatePostData } from "../../../core/domain/interface/post.interface";
 import StatusCode from "../../../core/enums/status-codes";
 import { successResponse, errorResponse } from "../../../core/domain/mappers/response.mapper";
-import { uploadToCloudinary } from "../../../core/configs/cloudinary";
 import { IAuthRequest } from "../../../core/middleware/auth.middleware";
 import { CreatePostDtoType, UpdatePostDtoType } from "../../../core/domain/dto/post.dto";
 
@@ -28,7 +28,7 @@ class PostController {
             const result = await this._postService.createPost({ title, body, tags: tags ?? '', status: status ?? 'draft', author: user.userId }, file);
             res.status(StatusCode.CREATED).json(successResponse('Post created successfully', result));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -37,7 +37,7 @@ class PostController {
             const posts = await this._postService.getAllPublishedPosts();
             res.status(StatusCode.OK).json(successResponse('Published posts fetched successfully', posts));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -51,7 +51,7 @@ class PostController {
             const posts = await this._postService.searchPublishedPosts(query);
             res.status(StatusCode.OK).json(successResponse('Search results fetched successfully', posts));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -61,7 +61,7 @@ class PostController {
             const posts = await this._postService.getPostsByAuthorId(authorId);
             res.status(StatusCode.OK).json(successResponse('Posts fetched successfully', posts));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -75,7 +75,7 @@ class PostController {
             }
             res.status(StatusCode.OK).json(successResponse('Post fetched successfully', post));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -83,21 +83,14 @@ class PostController {
         const id = req.params.id as string;
         try {
             const updateData = req.body as UpdatePostDtoType;
-            const imageUrl = req.file ? await uploadToCloudinary(req.file.buffer) : undefined;
-
-            const payload: Record<string, unknown> = { ...updateData };
-            if (imageUrl) {
-                payload.imageUrl = imageUrl;
-            }
-
-            const post = await this._postService.updatePost(id, payload);
+            const post = await this._postService.updatePost(id, updateData as Partial<IUpdatePostData>, req.file);
             if (!post) {
                 errorResponse(res, StatusCode.NOT_FOUND, null, 'Post not found');
                 return;
             }
             res.status(StatusCode.OK).json(successResponse('Post updated successfully', post));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -111,7 +104,7 @@ class PostController {
             }
             res.status(StatusCode.OK).json(successResponse('Post deleted successfully'));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -126,7 +119,7 @@ class PostController {
             const result = await this._postService.toggleLike(user.userId, postId);
             res.status(StatusCode.OK).json(successResponse('Like toggled successfully', result));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -140,7 +133,7 @@ class PostController {
             const posts = await this._postService.getLikedPosts(user.userId);
             res.status(StatusCode.OK).json(successResponse('Liked posts fetched successfully', posts));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 
@@ -154,7 +147,7 @@ class PostController {
             const ids = await this._postService.getLikedIds(user.userId);
             res.status(StatusCode.OK).json(successResponse('Liked IDs fetched successfully', ids));
         } catch (error: unknown) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, error);
+            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, error);
         }
     }
 }

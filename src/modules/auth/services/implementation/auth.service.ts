@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { IJwtPayload } from '../../../../core/middleware/auth.middleware';
 import { ILoginResponse, IUser, IUserResponse } from '../../../../core/domain/interface/user.interface';
 import userMapper from '../../../../core/domain/mappers/user.mapper';
-import { IUserRepository } from '../../../../core/domain/repositories/interface/user-repository.interface';
+import { IUserRepository } from '../../../../repositories/interfaces/user-repository.interface';
 import { IAuthService } from '../interface/auth-service.interface';
 
 export class AuthService implements IAuthService {
