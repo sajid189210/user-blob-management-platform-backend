@@ -10,6 +10,25 @@ class AuthController {
         private _tokenService: ITokenService,
     ) { }
 
+    private setRefreshTokenCookie(res: Response, token: string): void {
+        res.cookie('refresh_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            path: '/',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+    }
+
+    private clearRefreshTokenCookie(res: Response): void {
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/',
+        });
+    }
+
     async signup(req: Request, res: Response, _next: NextFunction): Promise<void> {
         const { name, email, password } = req.body;
 
@@ -40,13 +59,7 @@ class AuthController {
             const accessToken = this._tokenService.generateAccessToken(payload.userId, user.email);
             const refreshToken = this._tokenService.generateRefreshToken(payload.userId, user.email);
 
-            res.cookie('refresh_token', refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                path: '/',
-                sameSite: 'lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
+            this.setRefreshTokenCookie(res, refreshToken);
 
             const userData = await this._authService.getUserResponseByEmail(payload.email);
 
@@ -60,12 +73,7 @@ class AuthController {
     }
 
     async logout(req: Request, res: Response, _next: NextFunction): Promise<void> {
-        res.clearCookie('refresh_token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/',
-        });
+        this.clearRefreshTokenCookie(res);
         res.status(StatusCode.OK).json(successResponse('Logged out successfully'));
     }
 
@@ -83,13 +91,7 @@ class AuthController {
             return;
         }
 
-        res.cookie('refresh_token', result.refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        this.setRefreshTokenCookie(res, result.refreshToken);
 
         res.status(StatusCode.OK).json(successResponse('Login successful', {
             user: result.user,
