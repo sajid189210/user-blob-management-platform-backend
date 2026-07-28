@@ -15,7 +15,7 @@ class AuthController {
 
         const result = await this._authService.signup(name, email, password);
         if (!result) {
-            errorResponse(res, StatusCode.CONFLICT, null, 'Email already in use');
+            res.status(StatusCode.CONFLICT).json(errorResponse(null, 'Email already in use'));
             return;
         }
 
@@ -26,14 +26,14 @@ class AuthController {
         try {
             const token = req.cookies['refresh_token'];
             if (!token) {
-                errorResponse(res, StatusCode.UNAUTHORIZED, null, 'No refresh token provided');
+                res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'No refresh token provided'));
                 return;
             }
 
             const payload = this._tokenService.verifyRefreshToken(token);
             const user = await this._authService.findUserByEmail(payload.email);
             if (!user) {
-                errorResponse(res, StatusCode.UNAUTHORIZED, null, 'User not found');
+                res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'User not found'));
                 return;
             }
 
@@ -55,7 +55,7 @@ class AuthController {
                 accessToken,
             }));
         } catch {
-            errorResponse(res, StatusCode.UNAUTHORIZED, null, 'Invalid or expired refresh token');
+            res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'Invalid or expired refresh token'));
         }
     }
 
@@ -74,12 +74,12 @@ class AuthController {
 
         const result = await this._authService.login(email, password);
         if (!result) {
-            errorResponse(res, StatusCode.UNAUTHORIZED, null, 'Invalid email or password');
+            res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'Invalid email or password'));
             return;
         }
 
         if (!result.accessToken || !result.refreshToken) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER_ERROR, null, 'Something went wrong.');
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json(errorResponse(null, 'Something went wrong.'));
             return;
         }
 
