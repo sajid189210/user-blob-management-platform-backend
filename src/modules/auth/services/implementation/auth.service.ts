@@ -12,7 +12,7 @@ export class AuthService implements IAuthService {
 
     async findUserByEmail(email: string): Promise<IUser | null> {
         const doc = await this._userRepository.findUserByEmail(email);
-        if (!doc) return null;
+        if (!doc) {return null;}
         return {
             name: doc.name,
             email: doc.email,
