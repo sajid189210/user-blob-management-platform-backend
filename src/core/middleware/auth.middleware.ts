@@ -1,12 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import { IJwtPayload } from "../services/interfaces/token-service.interface";
 import { errorResponse } from "../domain/mappers/response.mapper";
 
-export interface IJwtPayload extends JwtPayload {
-    userId: string;
-    email: string;
-    role: string;
-}
+export { IJwtPayload };
 
 export interface IAuthRequest extends Request {
     user?: IJwtPayload;

@@ -1,10 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { IAuthService } from "../services/interface/auth-service.interface";
+import { ITokenService } from "../../../core/services/interfaces/token-service.interface";
 import StatusCode from "../../../core/enums/status-codes";
 import { successResponse, errorResponse } from "../../../core/domain/mappers/response.mapper";
 
 class AuthController {
-    constructor(private _authService: IAuthService) { }
+    constructor(
+        private _authService: IAuthService,
+        private _tokenService: ITokenService,
+    ) { }
 
     async signup(req: Request, res: Response, _next: NextFunction): Promise<void> {
         const { name, email, password } = req.body;
@@ -26,15 +30,15 @@ class AuthController {
                 return;
             }
 
-            const payload = this._authService.verifyRefreshToken(token);
+            const payload = this._tokenService.verifyRefreshToken(token);
             const user = await this._authService.findUserByEmail(payload.email);
             if (!user) {
                 errorResponse(res, StatusCode.UNAUTHORIZED, null, 'User not found');
                 return;
             }
 
-            const accessToken = this._authService.generateAccessToken(payload.userId, user.email);
-            const refreshToken = this._authService.generateRefreshToken(payload.userId, user.email);
+            const accessToken = this._tokenService.generateAccessToken(payload.userId, user.email);
+            const refreshToken = this._tokenService.generateRefreshToken(payload.userId, user.email);
 
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
