@@ -24,7 +24,7 @@ class AuthController {
         res.clearCookie('refresh_token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             path: '/',
         });
     }
@@ -45,7 +45,7 @@ class AuthController {
         try {
             const token = req.cookies['refresh_token'];
             if (!token) {
-                res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'No refresh token provided'));
+                res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'Session expired. Please log in again.'));
                 return;
             }
 
@@ -68,7 +68,7 @@ class AuthController {
                 accessToken,
             }));
         } catch {
-            res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'Invalid or expired refresh token'));
+            res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'Session expired. Please log in again.'));
         }
     }
 
