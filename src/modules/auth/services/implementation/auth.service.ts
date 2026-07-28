@@ -11,7 +11,14 @@ export class AuthService implements IAuthService {
     ) {}
 
     async findUserByEmail(email: string): Promise<IUser | null> {
-        return await this._userRepository.findUserByEmail(email);
+        const doc = await this._userRepository.findUserByEmail(email);
+        if (!doc) return null;
+        return {
+            name: doc.name,
+            email: doc.email,
+            password: doc.password,
+            liked: doc.liked ? doc.liked.map(id => id.toString()) : [],
+        };
     }
 
     async getUserResponseByEmail(email: string): Promise<IUserResponse | null> {

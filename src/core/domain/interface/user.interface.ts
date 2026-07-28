@@ -5,12 +5,12 @@ export interface IUser {
     email: string;
     password?: string;
     liked: string[];
-    comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 export interface IUserDocument extends IUser, Document {
     createdAt: Date;
     updatedAt: Date;
+    comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 export interface IUserResponse {
