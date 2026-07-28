@@ -12,7 +12,7 @@ export const createAuthMiddleware = (tokenService: ITokenService) => {
     return (req: IAuthRequest, _res: Response, next: NextFunction): void => {
         const authHeader = req.headers.authorization;
         if (!authHeader?.startsWith("Bearer ")) {
-            next(new AppError(401, "No token provided"));
+            next(new AppError(401, "Authentication required"));
             return;
         }
 
