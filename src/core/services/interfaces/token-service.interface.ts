@@ -9,5 +9,6 @@ export interface IJwtPayload extends JwtPayload {
 export interface ITokenService {
     generateAccessToken(userId: string, email: string): string;
     generateRefreshToken(userId: string, email: string): string;
+    verifyAccessToken(token: string): IJwtPayload;
     verifyRefreshToken(token: string): IJwtPayload;
 }

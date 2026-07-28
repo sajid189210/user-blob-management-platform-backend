@@ -2,11 +2,12 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { ROUTE_PATHS } from '../../../core/domain/constants/routes';
 import PostController from '../controllers/post.controller';
 import upload from '../../../core/middleware/upload.middleware';
-import { authMiddleware } from '../../../core/middleware/auth.middleware';
 import { validate } from '../../../core/middleware/validate.middleware';
 import { CreatePostDto, UpdatePostDto } from '../../../core/domain/dto/post.dto';
 
-const buildPostRoutes = (postController: PostController): Router => {
+type AuthMiddleware = (req: Request, res: Response, next: NextFunction) => void;
+
+const buildPostRoutes = (postController: PostController, authMiddleware: AuthMiddleware): Router => {
     const postRouter = Router();
 
     postRouter.get(ROUTE_PATHS.POST.PUBLISHED, (req: Request, res: Response, next: NextFunction) => postController.getAllPublishedPosts(req, res, next));

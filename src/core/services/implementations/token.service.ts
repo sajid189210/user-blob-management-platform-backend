@@ -30,6 +30,10 @@ export class TokenService implements ITokenService {
         );
     }
 
+    verifyAccessToken(token: string): IJwtPayload {
+        return jwt.verify(token, this._accessSecret) as IJwtPayload;
+    }
+
     verifyRefreshToken(token: string): IJwtPayload {
         return jwt.verify(token, this._refreshSecret) as IJwtPayload;
     }
