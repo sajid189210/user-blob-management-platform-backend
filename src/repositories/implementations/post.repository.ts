@@ -9,11 +9,11 @@ export class PostRepository extends BaseRepository<IPostDocument> implements IPo
     }
 
     async findAll(): Promise<IPostDocument[]> {
-        return await this._postModel.find().sort({ createdAt: -1 }).populate('author', 'name email').lean();
+        return await this._postModel.find().sort({ createdAt: -1 }).populate('author', 'name email');
     }
 
     async getAllPublishedPosts(): Promise<IPostDocument[]> {
-        return await this._postModel.find({ status: 'published' }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
+        return await this._postModel.find({ status: 'published' }).sort({ createdAt: -1 }).populate('author', 'name email');
     }
 
     async searchPublishedPosts(query: string): Promise<IPostDocument[]> {
@@ -26,19 +26,19 @@ export class PostRepository extends BaseRepository<IPostDocument> implements IPo
                 { body: { $regex: pattern, $options: 'i' } },
                 { tags: { $elemMatch: { $regex: pattern, $options: 'i' } } },
             ],
-        }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
+        }).sort({ createdAt: -1 }).populate('author', 'name email');
     }
 
     async getPostsByAuthorId(authorId: string): Promise<IPostDocument[]> {
-        return await this._postModel.find({ author: authorId }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
+        return await this._postModel.find({ author: authorId }).sort({ createdAt: -1 }).populate('author', 'name email');
     }
 
     async findById(id: string): Promise<IPostDocument | null> {
-        return await this._postModel.findById(id).populate('author', 'name email').lean();
+        return await this._postModel.findById(id).populate('author', 'name email');
     }
 
     async update(id: string, data: Partial<IPostDocument>): Promise<IPostDocument | null> {
-        return await this._postModel.findByIdAndUpdate(id, data, { new: true }).populate('author', 'name email').lean();
+        return await this._postModel.findByIdAndUpdate(id, data, { new: true }).populate('author', 'name email');
     }
 
     async delete(id: string): Promise<IPostDocument | null> {
@@ -46,14 +46,14 @@ export class PostRepository extends BaseRepository<IPostDocument> implements IPo
     }
 
     async findByIds(ids: string[]): Promise<IPostDocument[]> {
-        return await this._postModel.find({ _id: { $in: ids } }).sort({ createdAt: -1 }).populate('author', 'name email').lean();
+        return await this._postModel.find({ _id: { $in: ids } }).sort({ createdAt: -1 }).populate('author', 'name email');
     }
 
     async incrementLikes(postId: string): Promise<IPostDocument | null> {
-        return await this._postModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { new: true }).populate('author', 'name email').lean();
+        return await this._postModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { new: true }).populate('author', 'name email');
     }
 
     async decrementLikes(postId: string): Promise<IPostDocument | null> {
-        return await this._postModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { new: true }).populate('author', 'name email').lean();
+        return await this._postModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { new: true }).populate('author', 'name email');
     }
 }
