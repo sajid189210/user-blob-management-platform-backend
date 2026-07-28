@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import multer from 'multer';
-import { StatusCode } from "../domain/constants/statusCodes";
+import StatusCode from "../enums/status-codes";
 
 export interface ICustomError extends Error {
     statusCode?: number;

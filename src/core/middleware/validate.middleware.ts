@@ -20,7 +20,7 @@ export const validate = (schema: ZodSchema, source: ValidationSource = 'body') =
         const result = schema.safeParse(data);
         if (!result.success) {
             const messages = result.error.issues.map(i => i.message).join(', ');
-            errorResponse(res, StatusCode.BAD_REQUEST, null, messages);
+            res.status(StatusCode.BAD_REQUEST).json(errorResponse(null, messages));
             return;
         }
 

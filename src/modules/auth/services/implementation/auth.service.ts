@@ -1,49 +1,24 @@
-import jwt from 'jsonwebtoken';
-import { IJwtPayload } from '../../../../core/middleware/auth.middleware';
+import { ITokenService } from '../../../../core/services/interfaces/token-service.interface';
 import { ILoginResponse, IUser, IUserResponse } from '../../../../core/domain/interface/user.interface';
 import userMapper from '../../../../core/domain/mappers/user.mapper';
-import { IUserRepository } from '../../../../core/domain/repositories/interface/user-repository.interface';
+import { IUserRepository } from '../../../../repositories/interfaces/user-repository.interface';
 import { IAuthService } from '../interface/auth-service.interface';
 
 export class AuthService implements IAuthService {
-    private _refreshSecret;
-    private _refreshExpiry;
-    private _accessSecret;
-    private _accessExpiry;
-
     constructor(
         private readonly _userRepository: IUserRepository,
-    ) {
-        this._refreshSecret = process.env.JWT_REFRESH_SECRET ?? 'jwt_refresh_token_secret';
-        this._accessSecret = process.env.JWT_ACCESS_SECRET ?? 'jwt_access_token_secret';
-        this._accessExpiry = process.env.JWT_ACCESS_EXPIRES_IN ?? '15m';
-        this._refreshExpiry = process.env.JWT_REFRESH_EXPIRES_IN ?? '7d';
-    }
-
-    generateAccessToken(userId: string, email: string): string {
-        return jwt.sign(
-            { userId, email },
-            this._accessSecret,
-            { expiresIn: this._accessExpiry as jwt.SignOptions['expiresIn'] }
-        );
-    }
-
-    generateRefreshToken(userId: string, email: string): string {
-        return jwt.sign(
-            { userId, email },
-            this._refreshSecret,
-            {
-                expiresIn: this._refreshExpiry as jwt.SignOptions['expiresIn']
-            }
-        );
-    }
-
-    verifyRefreshToken(token: string): IJwtPayload {
-        return jwt.verify(token, this._refreshSecret) as IJwtPayload;
-    }
+        private readonly _tokenService: ITokenService,
+    ) {}
 
     async findUserByEmail(email: string): Promise<IUser | null> {
-        return await this._userRepository.findUserByEmail(email);
+        const doc = await this._userRepository.findUserByEmail(email);
+        if (!doc) return null;
+        return {
+            name: doc.name,
+            email: doc.email,
+            password: doc.password,
+            liked: doc.liked ? doc.liked.map(id => id.toString()) : [],
+        };
     }
 
     async getUserResponseByEmail(email: string): Promise<IUserResponse | null> {
@@ -69,8 +44,8 @@ export class AuthService implements IAuthService {
 
         const user = userMapper(userDoc);
 
-        const accessToken = this.generateAccessToken(user.id, user.email);
-        const refreshToken = this.generateRefreshToken(user.id, user.email);
+        const accessToken = this._tokenService.generateAccessToken(user.id, user.email);
+        const refreshToken = this._tokenService.generateRefreshToken(user.id, user.email);
 
         return {
             user,

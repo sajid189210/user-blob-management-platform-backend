@@ -1,4 +1,4 @@
-import { IPostDocument } from "../../interface/post.interface";
+import { IPostDocument } from "../../core/domain/interface/post.interface";
 import { IBaseRepository } from "./base-repository.interface";
 
 export interface IPostRepository extends IBaseRepository<IPostDocument> {

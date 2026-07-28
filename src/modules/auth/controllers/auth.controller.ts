@@ -1,17 +1,40 @@
 import { NextFunction, Request, Response } from "express";
 import { IAuthService } from "../services/interface/auth-service.interface";
+import { ITokenService } from "../../../core/services/interfaces/token-service.interface";
 import StatusCode from "../../../core/enums/status-codes";
 import { successResponse, errorResponse } from "../../../core/domain/mappers/response.mapper";
 
 class AuthController {
-    constructor(private _authService: IAuthService) { }
+    constructor(
+        private _authService: IAuthService,
+        private _tokenService: ITokenService,
+    ) { }
+
+    private setRefreshTokenCookie(res: Response, token: string): void {
+        res.cookie('refresh_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            path: '/',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+    }
+
+    private clearRefreshTokenCookie(res: Response): void {
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/',
+        });
+    }
 
     async signup(req: Request, res: Response, _next: NextFunction): Promise<void> {
         const { name, email, password } = req.body;
 
         const result = await this._authService.signup(name, email, password);
         if (!result) {
-            errorResponse(res, StatusCode.CONFLICT, null, 'Email already in use');
+            res.status(StatusCode.CONFLICT).json(errorResponse(null, 'Email already in use'));
             return;
         }
 
@@ -22,27 +45,21 @@ class AuthController {
         try {
             const token = req.cookies['refresh_token'];
             if (!token) {
-                errorResponse(res, StatusCode.UNAUTHORIZED, null, 'No refresh token provided');
+                res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'No refresh token provided'));
                 return;
             }
 
-            const payload = this._authService.verifyRefreshToken(token);
+            const payload = this._tokenService.verifyRefreshToken(token);
             const user = await this._authService.findUserByEmail(payload.email);
             if (!user) {
-                errorResponse(res, StatusCode.UNAUTHORIZED, null, 'User not found');
+                res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'User not found'));
                 return;
             }
 
-            const accessToken = this._authService.generateAccessToken(payload.userId, user.email);
-            const refreshToken = this._authService.generateRefreshToken(payload.userId, user.email);
+            const accessToken = this._tokenService.generateAccessToken(payload.userId, user.email);
+            const refreshToken = this._tokenService.generateRefreshToken(payload.userId, user.email);
 
-            res.cookie('refresh_token', refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                path: '/',
-                sameSite: 'lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
+            this.setRefreshTokenCookie(res, refreshToken);
 
             const userData = await this._authService.getUserResponseByEmail(payload.email);
 
@@ -51,17 +68,12 @@ class AuthController {
                 accessToken,
             }));
         } catch {
-            errorResponse(res, StatusCode.UNAUTHORIZED, null, 'Invalid or expired refresh token');
+            res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'Invalid or expired refresh token'));
         }
     }
 
     async logout(req: Request, res: Response, _next: NextFunction): Promise<void> {
-        res.clearCookie('refresh_token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/',
-        });
+        this.clearRefreshTokenCookie(res);
         res.status(StatusCode.OK).json(successResponse('Logged out successfully'));
     }
 
@@ -70,22 +82,16 @@ class AuthController {
 
         const result = await this._authService.login(email, password);
         if (!result) {
-            errorResponse(res, StatusCode.UNAUTHORIZED, null, 'Invalid email or password');
+            res.status(StatusCode.UNAUTHORIZED).json(errorResponse(null, 'Invalid email or password'));
             return;
         }
 
         if (!result.accessToken || !result.refreshToken) {
-            errorResponse(res, StatusCode.INTERNAL_SERVER, null, 'Something went wrong.');
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json(errorResponse(null, 'Something went wrong.'));
             return;
         }
 
-        res.cookie('refresh_token', result.refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        this.setRefreshTokenCookie(res, result.refreshToken);
 
         res.status(StatusCode.OK).json(successResponse('Login successful', {
             user: result.user,
